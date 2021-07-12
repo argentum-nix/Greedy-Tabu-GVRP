@@ -1,7 +1,7 @@
-#include "instance_util.h"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include "instance_util.h"
 using namespace std;
 
 Instance::Instance(std::string iName) {
@@ -56,7 +56,6 @@ void Instance::loadData() {
     DEBUG(serviceTime);
     DEBUG(refuelTime);*/
 
- 	Graph graph;
  	// Lee el arhivo restante
     while(cin >> id) {
     	cin >> ntype 
@@ -75,13 +74,29 @@ void Instance::loadData() {
     	Node node(id, ntype, longitude, latitude);
     	Key key(ntype, id);
     	nodeMap.insert({key, node});
-    	// aqui hay que agregar el nodo a la lista de adyacencia
+    	// Agrega una llave tipo (ntype, id) y lista vacia de vecinos
+    	vector<Edge> edge;
+    	graph.adjList.insert({key, edge});
     }
+    graph.showAdjList();
     cin.rdbuf(cinbuf);
     in.close();
 }
 
 
+void Graph::showAdjList() {
+	for(auto x: adjList) {
+		cout << "(" << x.first.first << " , " << x.first.second << ") -> ";
+		cout << "[";
+		for(size_t i = 0; i < x.second.size(); i++) {
+			cout << " (";
+			cout << "(" << x.second[i].first.first << ", " << x.second[i].first.second << "), "; 
+			cout << x.second[i].second;
+			cout << " );";
+		}
+		cout << " ]\n";
+	}
+}
 
 Instance::~Instance() {
 	//cout << "[LOG] Instance destroyed\n";
