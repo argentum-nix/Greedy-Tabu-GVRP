@@ -1,12 +1,13 @@
 CC = g++
-HEADERS = instance_util.h
-OBJ = instance_util.o main.o
+CFLAGS = -Wall -W 
+HEADERS = instance_util.h solver.h
+OBJ = instance_util.o solver.o main.o
 
 %.o: %.cpp $(DEPS)
-	$(CC) -Wall -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-GVRPGreedyTaboo: $(OBJ)
-	$(CC) -Wall -o $@ $^
+GVRPGreedyTabu: $(OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
 
 clean:
-	-rm *.o $(OBJ) GVRPGreedyTaboo
+	-rm -rf *.o GVRPGreedyTabu

@@ -27,7 +27,6 @@ typedef std::pair<Key, int> Edge;
 class Graph {
 public:
 	std::map<Key,std::vector<Edge>> adjList; // graph as map (C,0) -> [list of neighbours]
-	int size;
 	void printGraph();
 	//void addEdge(Edge e1, Edge e2);
 	void showAdjList();

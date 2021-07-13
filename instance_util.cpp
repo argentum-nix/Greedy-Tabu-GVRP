@@ -10,7 +10,6 @@ Instance::Instance(std::string iName) {
 }
 
 Graph::Graph() {
-	size = 0;
 }
 
 Node::Node(int id, char t, double lon, double lat){
@@ -78,7 +77,7 @@ void Instance::loadData() {
     	vector<Edge> edge;
     	graph.adjList.insert({key, edge});
     }
-    graph.showAdjList();
+    //graph.showAdjList();
     cin.rdbuf(cinbuf);
     in.close();
 }
