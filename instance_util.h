@@ -15,23 +15,9 @@ public:
 	double longitude;  
 	double latitude;
 	char nodeType;   // d=depot, f=refueling stat, c=customer   	
-	Node(int id, char t, double lon, double lat);
+	Node();
+	void setNodeData(int id, char t, double lon, double lat);
 	~Node();
-};
-
-
-typedef std::pair<char, int> Key;
-typedef std::map<Key, Node> Dict;
-typedef std::pair<Key, int> Edge;
-
-class Graph {
-public:
-	std::map<Key,std::vector<Edge>> adjList; // graph as map (C,0) -> [list of neighbours]
-	void printGraph();
-	//void addEdge(Edge e1, Edge e2);
-	void showAdjList();
-	Graph();
-	~Graph();		   		// destructor
 };
 
 class Instance {
@@ -46,9 +32,11 @@ public:
 	int serviceTime;               
 	double speed;      		// travelling speed
 
-	Dict nodeMap;			// map with nodes, hashed by id and type
-	Graph graph;			// adjacency list graph
-	void loadData();
+	std::vector<Node> customerNodes;
+	std::vector<Node> fuelNodes;
+	Node depot;
+
+	int loadData();
 	Instance(std::string iName);
 	~Instance();		   		// destructor
 };

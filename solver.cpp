@@ -22,7 +22,7 @@ double distanceHarvesine(double lon1, double lat1, double lon2, double lat2) {
 	double phi, lambda, r, toRadian, insideRootValue, d;
 	toRadian = M_PI/180.0;  	// radian conversion constant
 	r = 4182.44949;				// earth radius
-	// pre-calculate formuale parts
+	// pre-calculate formulae parts
 	phi = ((lat2 - lat1) * toRadian)/2;
 	phi = sin(phi);
 

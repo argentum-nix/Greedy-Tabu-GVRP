@@ -11,12 +11,10 @@ class GVRPSolver {
 private:
 	Instance* curInstance;	// current instance
 	std::string solDir;		// solution directory
-	double solQuality;		// solution quality
+	double solQuality;		// solution quality == total distance for all vehicles
 	int numVehicle; 		// final vehicle quantity
-	int numVisitedClients; 	// # of clientes serviced
-	double executionTime; 	// total execution time
-	// como guardo solucion por cada vehiculo?
-	// a pensar seniores
+	int numVisitedClients; 	// total of clientes serviced for all vehicles
+	double executionTime; 	// total execution time * quiza debe ser en  main? isntance
 public:
 	GVRPSolver(Instance* instance);
 	~GVRPSolver();

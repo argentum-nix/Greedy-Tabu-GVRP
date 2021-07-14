@@ -19,7 +19,12 @@ int main(int argc, char const *argv[]) {
     //bool debug_mode = (bool) stoi(argv[2]);
 
 	Instance gvrp(argv[1]);
-	gvrp.loadData();
+	
+	int archiveStatus = gvrp.loadData();
+	if(archiveStatus == -1) {
+		// Archive was not found!
+		return 0;
+	}
 	GVRPSolver solve(&gvrp);
 	return 0;
 }
