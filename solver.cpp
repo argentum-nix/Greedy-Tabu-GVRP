@@ -33,31 +33,63 @@ vector<nodeKey> GVRPSolver::greedySearch() {
 	int qualityGreedy = 0;
 	int timeGreedy = 0;
 	vector<nodeKey> greedyRoute;
-	Node currNode = curInstance->depot;
-	nodeKey nextNode = {'X', -1}; // 'None' node
+	Node curNode = curInstance->depot;
+	Node nextNode;
+
 	Node auxNode;
 
-	nodeKey currKey = {currNode.nodeType, currNode.nodeID};
-	greedyRoute.push_back(currKey);
+	nodeKey curKey = {curNode.nodeType, curNode.nodeID};
+	greedyRoute.push_back(curKey);
 
 	double curDistance = 0;
-	double minDistance = 9999999;
+	double acumulatedDistance = 0;
+	double minFoundDistance = 9999999;
 
 	double lat1, lon1, lat2, lon2;
+
+	double auxTime = 0;
+	double curNodeTime = 0;
 
 	while(timeGreedy < curInstance->maxTime) {
 		for(int i = 0; i < curInstance->numCustomers; i++) {
 			auxNode = curInstance->customerNodes[i];
 			if(visitedCustomerNodes[i] == 0) { // unvisited node
-				lon1 = currNode.longitude;
-				lat1 = currNode.latitude;
+				lon1 = curNode.longitude;
+				lat1 = curNode.latitude;
 				lon2 = auxNode.longitude;
 				lat2 = auxNode.latitude;
 				curDistance = distanceHarvesine(lon1, lat1, lon2, lat2);
-				cout << "i=" << i << " curDistance= " << curDistance << endl;
+
+				cout << auxNode.nodeType << auxNode.nodeID << ":";
+				DEBUG(curDistance);
+				DEBUG(minFoundDistance);
+
+				if(curDistance < minFoundDistance) {
+					// tengo combustible?
+					if(acumulatedDistance + curDistance < curInstance->maxDistance) {
+						auxTime = (curDistance / curInstance->speed) + curInstance->serviceTime;
+						if(auxTime +timeGreedy < curInstance->maxTime) {
+							nextNode = auxNode;
+							minFoundDistance = curDistance;
+							curNodeTime = auxTime;
+						}
+					}
+					// no tengo combustible, debo recargar
+					else {
+						cout << "No puedo viajar al nodo customer id=" << i+1 << endl;
+					}
+				}
 			}
 		}
-		timeGreedy = 660;
+		cout << "===========================================\n";
+		cout << "El minimo que encontre fue el nodo " << nextNode.nodeType << nextNode.nodeID << " con distancia minima= " << minFoundDistance << endl;;
+		timeGreedy += curNodeTime;
+		qualityGreedy += minFoundDistance;
+		acumulatedDistance += minFoundDistance;
+		DEBUG(acumulatedDistance);
+		visitedCustomerNodes[nextNode.nodeID-1] = 1;
+		minFoundDistance = 9999999;
+		curNode = nextNode;
 	}
 	return greedyRoute;
 }
