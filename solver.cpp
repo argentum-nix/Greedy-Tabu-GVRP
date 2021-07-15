@@ -11,12 +11,18 @@ GVRPSolver::GVRPSolver(Instance* instance){
 	numVisitedClients = 0;
 	executionTime = 0; // check this
 	// anything else? check later
-};
+}
+
+vehicleSolution::vehicleSolution(){
+	vehicleAcumTime = vehicleClients = 0;
+}
 
 
 GVRPSolver::~GVRPSolver(){
+}
 
-};
+vehicleSolution::~vehicleSolution(){
+}
 
 double distanceHarvesine(double lon1, double lat1, double lon2, double lat2) {
 	double phi, lambda, r, toRadian, insideRootValue, d;
