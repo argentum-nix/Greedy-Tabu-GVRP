@@ -49,9 +49,7 @@ int Instance::loadData() {
 	    	>> speed
 	    	>> serviceTime
 	    	>> refuelTime;
-
-	    depot.setNodeData(id, ntype, longitude, latitude);
-
+	    	
 	    /*DEBUG(name);
 	    DEBUG(numStations);
 	    DEBUG(numStations);
@@ -82,6 +80,9 @@ int Instance::loadData() {
 	    	}
 	    	else if(ntype == 'f') {
 	    		fuelNodes.push_back(node);
+	    	}
+	    	else if(ntype == 'd') {
+	    		depot.setNodeData(id, ntype, longitude, latitude);
 	    	}
 	    }
 	    cin.rdbuf(cinbuf);

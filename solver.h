@@ -5,7 +5,7 @@
 
 #define OUTPUT_DIRECTORY "./solutions/"
 typedef std::map<int,int> hash;
-typedef std::map<char, int> nodeKey;
+typedef std::pair<char, int> nodeKey;
 
 double distanceHarvesine(double lon1, double lat1, double lon2, double lat2);
 
@@ -35,6 +35,7 @@ private:
 	// otherwise (2i+1) its a fuel with id=i
 	std::vector<vehicleSolution> vehicleRoutes;
 public:
+	std::vector<nodeKey> greedySearch();
 	GVRPSolver(Instance* instance);
 	~GVRPSolver();
 };	
