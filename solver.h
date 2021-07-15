@@ -8,6 +8,7 @@ typedef std::map<int,int> hash;
 typedef std::pair<char, int> nodeKey;
 
 double distanceHarvesine(double lon1, double lat1, double lon2, double lat2);
+void printNodeKeyVector(std::vector<nodeKey> v);
 
 class vehicleSolution {
 public:

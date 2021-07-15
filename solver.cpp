@@ -50,51 +50,88 @@ vector<nodeKey> GVRPSolver::greedySearch() {
 	double auxTime = 0;
 	double curNodeTime = 0;
 
+	int flagRefuel = 1;
+	int flagTerminate = 1;
+
 	while(timeGreedy < curInstance->maxTime) {
+		lon1 = curNode.longitude;
+		lat1 = curNode.latitude;
 		for(int i = 0; i < curInstance->numCustomers; i++) {
 			auxNode = curInstance->customerNodes[i];
 			if(visitedCustomerNodes[i] == 0) { // unvisited node
-				lon1 = curNode.longitude;
-				lat1 = curNode.latitude;
 				lon2 = auxNode.longitude;
 				lat2 = auxNode.latitude;
 				curDistance = distanceHarvesine(lon1, lat1, lon2, lat2);
 
-				cout << auxNode.nodeType << auxNode.nodeID << ":";
-				DEBUG(curDistance);
-				DEBUG(minFoundDistance);
+				//cout << auxNode.nodeType << auxNode.nodeID << ":";
+				//DEBUG(curDistance);
+				//DEBUG(minFoundDistance);
 
 				if(curDistance < minFoundDistance) {
 					// tengo combustible?
 					if(acumulatedDistance + curDistance < curInstance->maxDistance) {
 						auxTime = (curDistance / curInstance->speed) + curInstance->serviceTime;
-						if(auxTime +timeGreedy < curInstance->maxTime) {
+						if(auxTime + timeGreedy < curInstance->maxTime) {
 							nextNode = auxNode;
 							minFoundDistance = curDistance;
 							curNodeTime = auxTime;
+							flagRefuel = 0;
+							flagTerminate = 0;
 						}
-					}
-					// no tengo combustible, debo recargar
-					else {
-						cout << "No puedo viajar al nodo customer id=" << i+1 << endl;
 					}
 				}
 			}
 		}
-		cout << "===========================================\n";
+		if(flagRefuel) {
+			for(int j = 0; j < curInstance->numStations; j++) {
+				auxNode = curInstance->fuelNodes[j];
+				lon2 = auxNode.longitude;
+				lat2 = auxNode.latitude;
+				curDistance = distanceHarvesine(lon1, lat1, lon2, lat2);
+
+				//cout << auxNode.nodeType << auxNode.nodeID << ":";
+				//DEBUG(curDistance);
+				//DEBUG(minFoundDistance);
+
+				if(curDistance < minFoundDistance) {
+					if(acumulatedDistance + curDistance < curInstance->maxDistance) {
+						auxTime = (curDistance / curInstance->speed) + curInstance->refuelTime;
+						if(auxTime + timeGreedy < curInstance->maxTime) {
+							nextNode = auxNode;
+							minFoundDistance = curDistance;
+							curNodeTime = auxTime;
+							flagTerminate = 0;
+						}
+					}
+				}
+			}
+		}
 		cout << "El minimo que encontre fue el nodo " << nextNode.nodeType << nextNode.nodeID << " con distancia minima= " << minFoundDistance << endl;;
+		if(flagTerminate) break;
 		timeGreedy += curNodeTime;
-		qualityGreedy += minFoundDistance;
-		acumulatedDistance += minFoundDistance;
 		DEBUG(acumulatedDistance);
 		visitedCustomerNodes[nextNode.nodeID-1] = 1;
+		qualityGreedy += minFoundDistance;
+		acumulatedDistance += minFoundDistance;
 		minFoundDistance = 9999999;
+		flagRefuel = 1;
+		flagTerminate = 1;
 		curNode = nextNode;
+		greedyRoute.push_back({nextNode.nodeType, nextNode.nodeID});
 	}
+	DEBUG(qualityGreedy);
+	DEBUG(timeGreedy);
+	printNodeKeyVector(greedyRoute);
 	return greedyRoute;
 }
 
 
+void printNodeKeyVector(std::vector<nodeKey> v) {
+	for(auto x: v) {
+		cout << x.first << x.second << "-";
+	}
+	cout << "*\n";
+}
 
 double distanceHarvesine(double lon1, double lat1, double lon2, double lat2) {
 	double phi, lambda, r, toRadian, insideRootValue, d;
