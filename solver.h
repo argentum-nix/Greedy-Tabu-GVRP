@@ -4,8 +4,9 @@
 #include "instance_util.h"
 
 #define OUTPUT_DIRECTORY "./solutions/"
-typedef std::map<int,int> hash;
+//typedef std::map<int,int> hash;
 typedef std::pair<char, int> nodeKey;
+typedef std::pair<int, std::pair<int, int>> AFSDepotRouteInfo;
 
 double distanceHarvesine(double lon1, double lat1, double lon2, double lat2);
 void printNodeKeyVector(std::vector<nodeKey> v);
@@ -29,12 +30,13 @@ private:
 	double executionTime; 	// total execution time * quiza debe ser en  main? isntance
 
 	std::vector<int> visitedCustomerNodes;
-	std::map<hash, int> distances;
+	//std::map<hash, int> distances;
 	// (key, distance)
 	// key is such as <idNode1,idNode2>
 	// if <idNode> is 2i, its a customer with id=i
 	// otherwise (2i+1) its a fuel with id=i
 	std::vector<vehicleSolution> vehicleRoutes;
+	AFSDepotRouteInfo findRouteToDepot(double acumDist, double acumTime, double lon1, double lat1);
 public:
 	std::vector<nodeKey> greedySearch();
 	GVRPSolver(Instance* instance);
