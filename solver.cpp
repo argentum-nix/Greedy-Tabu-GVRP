@@ -16,7 +16,6 @@ GVRPSolver::GVRPSolver(Instance* instance){
 	}
 	vector<nodeKey> xd = greedySearch();
 	checkFeasibility(xd);
-	cout << "dps de search siii\n";
 }
 
 vehicleSolution::vehicleSolution(){
@@ -183,11 +182,22 @@ vector<nodeKey> GVRPSolver::greedySearch() {
 			//cout << "Parece que no puedo viajar a ningun nodo, buscare un refuel\n";
 			returnInfo = findRouteToDepot(acumulatedDistance, timeGreedy, curNode.longitude, curNode.latitude);
 			if(returnInfo.first.first != -1) {
+				flagCanReturn = 1;
 				nextNode = curInstance->fuelNodes[returnInfo.first.first];
 				minFoundDistance = returnInfo.second.first;
 				curNodeTime = curInstance->refuelTime + returnInfo.second.first / curInstance->speed;
 				flagTerminate = 0;
 				acumulatedDistance = 0;
+				cout << returnInfo.first.first << " " << returnInfo.first.second << " " << returnInfo.second.first << " " << returnInfo.second.second << endl;
+				if(returnInfo.first.first != 0) {
+					finalReturnTime = returnInfo.second.second/curInstance->speed;
+					finalReturnDist = returnInfo.second.second;
+				}
+				else {
+					finalReturnTime = returnInfo.second.first/curInstance->speed;
+					finalReturnDist = returnInfo.second.first;
+				}
+				
 
 			}
 			else {
@@ -204,12 +214,6 @@ vector<nodeKey> GVRPSolver::greedySearch() {
 		}
 
 		cout << "\nEl minimo que encontre fue el nodo " << nextNode.nodeType << nextNode.nodeID << " con distancia minima= " << minFoundDistance << endl;
-		if(flagAFSReturnRoute) {
-			cout << "Retornare usando un AFS-Depot\n";
-		}
-		else if(flagDepotReturnRoute) {
-			cout << "Retornare al depot directo\n";
-		}
 		//DEBUG(acumulatedDistance);
 		if(!flagRefuel) {
 			visitedCustomerNodes[nextNode.nodeID-1] = 1;
@@ -224,11 +228,23 @@ vector<nodeKey> GVRPSolver::greedySearch() {
 		flagCanReturn = 0;
 		curNode = nextNode;
 		greedyRoute.push_back({nextNode.nodeType, nextNode.nodeID});
+		//cout << nextNode.nodeType << nextNode.nodeID << " " << qualityGreedy << " " << timeGreedy << "\n";
 	}
 
+	// when last visited node is f0, dont count in the refuel time
+	// exchange f0 with d0
+	if(greedyRoute.back().first == 'f' && greedyRoute.back().second == 0){
+		cout<< "entreeeee\n";
+		greedyRoute.pop_back();
+		timeGreedy -= curInstance->refuelTime;
+		finalReturnTime = 0;
+		finalReturnDist = 0;
+	}
 	greedyRoute.push_back({'d', 0});
+
 	timeGreedy += finalReturnTime;
 	qualityGreedy += finalReturnDist;
+
 	DEBUG(qualityGreedy);
 	DEBUG(timeGreedy);
 	printNodeKeyVector(greedyRoute);
@@ -241,7 +257,7 @@ void GVRPSolver::checkFeasibility(std::vector<nodeKey> v) {
 	double totalTime = 0;
 	double acumDist = 0;
 	double dist = 0;
-
+	cout << "CHECK:==========================================\n";
 	curNode = curInstance->depot;
 	for(size_t i = 1; i < v.size(); i++) {
 		if(v[i].first == 'c' ) {
@@ -278,6 +294,8 @@ void GVRPSolver::checkFeasibility(std::vector<nodeKey> v) {
 		if(totalTime > curInstance->maxTime) {
 			cout << "No se cumplio la restriccion de tiempo en el nodo: " << auxNode.nodeType << auxNode.nodeID << endl;
 		}
+
+		//cout << auxNode.nodeType << auxNode.nodeID << " " << totalQuality << " " << totalTime << "\n";
 
 	}
 	DEBUG(totalTime);
