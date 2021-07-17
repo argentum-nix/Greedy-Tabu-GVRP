@@ -14,19 +14,38 @@ GVRPSolver::GVRPSolver(Instance* instance){
 	for(int i = 0; i < curInstance->numCustomers; i++) {
 		visitedCustomerNodes.push_back(0);
 	}
-	vector<nodeKey> xd = greedySearch();
-	checkFeasibility(xd);
+	vehicleSolution sol = greedySearch();
+	while(sol.vehicleClients != 0) {
+		cout << "cl=" << sol.vehicleClients << endl;
+		numVisitedClients += sol.vehicleClients;
+		numVehicle++;
+		cout << "Calidad obtenida= " << sol.vehicleSolQuality << " tiempo = " << sol.vehicleAcumTime << endl;
+		checkFeasibility(sol.route);
+		printNodeKeyVector(sol.route);
+		cout << "\n";
+		sol = greedySearch();
+	}
+	cout << "En total envie: " << numVehicle << " autos\n";
+	cout << "Y visite: " << numVisitedClients << " clientes\n";
+	//checkFeasibility(sol.route);
+	//tabuSearch(sol);
+} 
+
+vehicleSolution::vehicleSolution() {
+	vehicleAcumTime = vehicleClients = vehicleSolQuality = 0;
 }
 
-vehicleSolution::vehicleSolution(){
-	vehicleAcumTime = vehicleClients = 0;
+void vehicleSolution::setVehicleSolution(std::vector<nodeKey> r, double time, double quality, int clients) {
+	vehicleSolQuality = quality;
+	route = r;
+	vehicleAcumTime = time;
+	vehicleClients = clients;
 }
-
 
 GVRPSolver::~GVRPSolver(){
 }
 
-vehicleSolution::~vehicleSolution(){
+vehicleSolution::~vehicleSolution() {
 }
 
 AFSDepotRouteInfo GVRPSolver::findRouteToDepot(double acumDist, double acumTime, double lon1, double lat1) {
@@ -77,7 +96,7 @@ AFSDepotRouteInfo GVRPSolver::findRouteToDepot(double acumDist, double acumTime,
 	return solution;
 }
 
-vector<nodeKey> GVRPSolver::greedySearch() {
+vehicleSolution GVRPSolver::greedySearch() {
 	vector<nodeKey> greedyRoute;
 	Node curNode = curInstance->depot;
 	Node nextNode, auxNode;
@@ -92,7 +111,7 @@ vector<nodeKey> GVRPSolver::greedySearch() {
 	double auxTime = 0, curNodeTime = 0;
 	double finalReturnTime = 0, finalReturnDist = 0;
 	int flagRefuel = 1, flagTerminate = 1, flagCanReturn = 0;
-
+	int totalClients = 0;
 	AFSDepotRouteInfo returnInfo;
 
 	// Depot longitude and latitude
@@ -162,7 +181,6 @@ vector<nodeKey> GVRPSolver::greedySearch() {
 				curNodeTime = curInstance->refuelTime + returnInfo.second.first / curInstance->speed;
 				flagTerminate = 0;
 				acumulatedDistance = 0;
-				cout << returnInfo.first.first << " " << returnInfo.first.second << " " << returnInfo.second.first << " " << returnInfo.second.second << endl;
 				if(returnInfo.first.first != 0) {
 					finalReturnTime = returnInfo.second.second/curInstance->speed;
 					finalReturnDist = returnInfo.second.second;
@@ -188,6 +206,7 @@ vector<nodeKey> GVRPSolver::greedySearch() {
 		flagTerminate = 1;
 		flagCanReturn = 0;
 		curNode = nextNode;
+		if(nextNode.nodeType == 'c') totalClients++;
 		greedyRoute.push_back({nextNode.nodeType, nextNode.nodeID});
 	}
 
@@ -204,11 +223,12 @@ vector<nodeKey> GVRPSolver::greedySearch() {
 	timeGreedy += finalReturnTime;
 	qualityGreedy += finalReturnDist;
 
-	DEBUG(timeGreedy);
-	DEBUG(qualityGreedy);
-	printNodeKeyVector(greedyRoute);
-	return greedyRoute;
+	vehicleSolution solution;
+	solution.setVehicleSolution(greedyRoute, timeGreedy, qualityGreedy, totalClients);
+	return solution;
 }
+
+
 
 void GVRPSolver::checkFeasibility(std::vector<nodeKey> v) {
 	Node auxNode, curNode;
@@ -286,3 +306,18 @@ double distanceHarvesine(double lon1, double lat1, double lon2, double lat2) {
     d = 2 * r * asin(sqrt(insideRootValue));
     return d;
 }
+
+
+
+
+vehicleSolution GVRPSolver::tabuSearch(vehicleSolution greedySol) {
+	vehicleSolution sCurrent = greedySol;
+	vector<pair<nodeKey, nodeKey>> tabu;
+	vehicleSolution sBest = sCurrent;
+	int t = 50;
+	while(t--) {
+
+	}
+	return greedySol;
+}
+

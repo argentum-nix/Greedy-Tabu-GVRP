@@ -13,9 +13,11 @@ void printNodeKeyVector(std::vector<nodeKey> v);
 
 class vehicleSolution {
 public:
-	int vehicleAcumTime;
+	double vehicleAcumTime;
+	double vehicleSolQuality;
 	int vehicleClients;
 	std::vector<nodeKey> route;
+	void setVehicleSolution(std::vector<nodeKey> r, double time, double quality, int clients);
 	vehicleSolution();
 	~vehicleSolution();
 };
@@ -39,7 +41,8 @@ private:
 	AFSDepotRouteInfo findRouteToDepot(double acumDist, double acumTime, double lon1, double lat1);
 	void checkFeasibility(std::vector<nodeKey> v);
 public:
-	std::vector<nodeKey> greedySearch();
+	vehicleSolution greedySearch();
+	vehicleSolution tabuSearch(vehicleSolution greedySol);
 	GVRPSolver(Instance* instance);
 	~GVRPSolver();
 };	
