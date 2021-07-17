@@ -6,7 +6,7 @@
 #define OUTPUT_DIRECTORY "./solutions/"
 //typedef std::map<int,int> hash;
 typedef std::pair<char, int> nodeKey;
-typedef std::pair<int, std::pair<int, int>> AFSDepotRouteInfo;
+typedef std::pair<std::pair<int, int>, std::pair<double, double>> AFSDepotRouteInfo;
 
 double distanceHarvesine(double lon1, double lat1, double lon2, double lat2);
 void printNodeKeyVector(std::vector<nodeKey> v);
@@ -37,6 +37,7 @@ private:
 	// otherwise (2i+1) its a fuel with id=i
 	std::vector<vehicleSolution> vehicleRoutes;
 	AFSDepotRouteInfo findRouteToDepot(double acumDist, double acumTime, double lon1, double lat1);
+	void checkFeasibility(std::vector<nodeKey> v);
 public:
 	std::vector<nodeKey> greedySearch();
 	GVRPSolver(Instance* instance);
