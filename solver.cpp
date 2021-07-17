@@ -43,16 +43,12 @@ AFSDepotRouteInfo GVRPSolver::findRouteToDepot(double acumDist, double acumTime,
 	Node auxNode;
 	for(int i = 0; i < curInstance->numStations; i++) {
 		auxNode = curInstance->fuelNodes[i];
-		//cout<< "Entre con el nodo " << auxNode.nodeID << endl;
 		subrouteDistance = 0;
 		subrouteTime = 0;
 		lon3 = auxNode.longitude;
 		lat3 = auxNode.latitude;
 		// distance between current node & AFS
 		dist1 = distanceHarvesine(lon1, lat1, lon3, lat3);
-		//DEBUG(dist1);
-		//DEBUG(acumDist);
-		//DEBUG(curInstance->maxDistance);
 		// can travel to this AFS
 		if(dist1 + acumDist <= curInstance->maxDistance) {
 			// have enough time to travel
@@ -61,9 +57,6 @@ AFSDepotRouteInfo GVRPSolver::findRouteToDepot(double acumDist, double acumTime,
 				// distance between chosen AFS and depot
 				dist2 = distanceHarvesine(lon3, lat3, lon2, lat2);
 				// can travel to the depot
-				//DEBUG(dist1);
-				//DEBUG(dist2);
-				//DEBUG(dist1+dist2);
 				if(dist2 <= curInstance->maxDistance) {
 					// just enough time to travel and finish the route
 					subrouteTime += dist2/curInstance->speed;
@@ -85,62 +78,45 @@ AFSDepotRouteInfo GVRPSolver::findRouteToDepot(double acumDist, double acumTime,
 }
 
 vector<nodeKey> GVRPSolver::greedySearch() {
-	double qualityGreedy = 0;
-	double timeGreedy = 0;
 	vector<nodeKey> greedyRoute;
 	Node curNode = curInstance->depot;
-	Node nextNode;
-
-	Node auxNode;
+	Node nextNode, auxNode;
 
 	nodeKey curKey = {curNode.nodeType, curNode.nodeID};
 	greedyRoute.push_back(curKey);
 
-	double curDistance = 0;
-	double acumulatedDistance = 0;
+	double qualityGreedy = 0, timeGreedy = 0;
+	double curDistance = 0, acumulatedDistance = 0, toDepotDist = 0;
 	double minFoundDistance = 9999999;
 	double lat1, lon1, lat2, lon2, dLon, dLat;
 	double auxTime = 0, curNodeTime = 0;
-	int flagRefuel = 1, flagTerminate = 1;
-	double toDepotDist = 0;
+	double finalReturnTime = 0, finalReturnDist = 0;
+	int flagRefuel = 1, flagTerminate = 1, flagCanReturn = 0;
+
 	AFSDepotRouteInfo returnInfo;
+
 	// Depot longitude and latitude
 	dLon = curNode.longitude;
 	dLat = curNode.latitude;
 
-	int flagAFSReturnRoute = 0;
-	int flagDepotReturnRoute = 0;
-
-	double finalReturnTime = 0, finalReturnDist = 0;
-	int intermediateAFSId = 0, flagCanReturn = 0;
-
-	// quiza es mejor un mientras hayan nodos de clientes a visitar.
 	while(timeGreedy < curInstance->maxTime) {
 		lon1 = curNode.longitude;
 		lat1 = curNode.latitude;
-		flagAFSReturnRoute = 0;
-		flagDepotReturnRoute = 0;
 		for(int i = 0; i < curInstance->numCustomers; i++) {
 			auxNode = curInstance->customerNodes[i];
 			if(visitedCustomerNodes[i] == 0) { // unvisited node
 				lon2 = auxNode.longitude;
 				lat2 = auxNode.latitude;
 				curDistance = distanceHarvesine(lon1, lat1, lon2, lat2);
-				//DEBUG(curDistance);
-				//cout << auxNode.nodeType << auxNode.nodeID << ": ";
 				
 				if(curDistance < minFoundDistance && acumulatedDistance+curDistance < curInstance->maxDistance) {
-					// tengo combustible?
 					// Distance between cur node and depot
 					toDepotDist = distanceHarvesine(dLon, dLat, lon2, lat2);
 					returnInfo = findRouteToDepot(acumulatedDistance + curDistance, timeGreedy, lon2, lat2);
 					//can return from this new node?
 					if(returnInfo.first.first != -1) {
 						flagCanReturn = 1;
-						//DEBUG(toDepotDist);
-						//DEBUG(returnInfo.second.first + returnInfo.second.second);
 						if(returnInfo.second.first + returnInfo.second.second < toDepotDist) {
-							flagAFSReturnRoute = 1;
 							if(acumulatedDistance + curDistance + returnInfo.second.first <= curInstance->maxDistance) {
 								auxTime = (curDistance / curInstance->speed) + curInstance->serviceTime;
 								if(auxTime + timeGreedy + returnInfo.first.second <= curInstance->maxTime) {
@@ -151,14 +127,12 @@ vector<nodeKey> GVRPSolver::greedySearch() {
 									flagTerminate = 0;
 									finalReturnTime = returnInfo.first.second;
 									finalReturnDist = returnInfo.second.first + returnInfo.second.second;
-									intermediateAFSId = returnInfo.first.first;
 								}
 							}
 
 						}
 						else {
 							// its cheaper to return to deposit directely
-							flagDepotReturnRoute = 1;
 							if(acumulatedDistance + curDistance + toDepotDist <= curInstance->maxDistance) {
 								auxTime = (curDistance / curInstance->speed) + curInstance->serviceTime;
 								if(auxTime + timeGreedy + toDepotDist / curInstance->speed <= curInstance->maxTime) {
@@ -197,24 +171,11 @@ vector<nodeKey> GVRPSolver::greedySearch() {
 					finalReturnTime = returnInfo.second.first/curInstance->speed;
 					finalReturnDist = returnInfo.second.first;
 				}
-				
-
-			}
-			else {
-				cout << "Intente buscar un refuel y no encontre ninguno, -1, xd\n";
 			}
 		}
 		if(flagTerminate) break;
+		if(!flagCanReturn) break;
 
-
-		//DEBUG!!!
-		if(!flagCanReturn) {
-			cout << "No hay ningun nodo para poder volver a la casita" << endl;
-			break;
-		}
-
-		cout << "\nEl minimo que encontre fue el nodo " << nextNode.nodeType << nextNode.nodeID << " con distancia minima= " << minFoundDistance << endl;
-		//DEBUG(acumulatedDistance);
 		if(!flagRefuel) {
 			visitedCustomerNodes[nextNode.nodeID-1] = 1;
 		}
@@ -228,13 +189,11 @@ vector<nodeKey> GVRPSolver::greedySearch() {
 		flagCanReturn = 0;
 		curNode = nextNode;
 		greedyRoute.push_back({nextNode.nodeType, nextNode.nodeID});
-		//cout << nextNode.nodeType << nextNode.nodeID << " " << qualityGreedy << " " << timeGreedy << "\n";
 	}
 
 	// when last visited node is f0, dont count in the refuel time
 	// exchange f0 with d0
 	if(greedyRoute.back().first == 'f' && greedyRoute.back().second == 0){
-		cout<< "entreeeee\n";
 		greedyRoute.pop_back();
 		timeGreedy -= curInstance->refuelTime;
 		finalReturnTime = 0;
@@ -245,8 +204,8 @@ vector<nodeKey> GVRPSolver::greedySearch() {
 	timeGreedy += finalReturnTime;
 	qualityGreedy += finalReturnDist;
 
-	DEBUG(qualityGreedy);
 	DEBUG(timeGreedy);
+	DEBUG(qualityGreedy);
 	printNodeKeyVector(greedyRoute);
 	return greedyRoute;
 }
