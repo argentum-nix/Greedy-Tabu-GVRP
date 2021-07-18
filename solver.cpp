@@ -410,7 +410,16 @@ void GVRPSolver::recalculateTimeQuality(vehicleSolution s, int i, int j) {
 }
 
 void GVRPSolver::generateNewSol(vehicleSolution s, int i, int j) {
-	reverse(s.route.begin() + i, s.route.begin() + j + 1); //2opt
+	//DEBUG(i);
+	//DEBUG(j);
+	//printNodeKeyVector(s.route);
+	if(i < j) {
+		reverse(s.route.begin() + i, s.route.begin() + j + 1); //2opt
+	}
+	else{
+		reverse(s.route.begin() + j, s.route.begin() + i + 1); //2opt;
+	}
+	//printNodeKeyVector(s.route);
 	recalculateTimeQuality(s, i, j);
 }
 
@@ -430,7 +439,7 @@ vehicleSolution GVRPSolver::tabuSearch(vehicleSolution greedySol) {
 	vehicleSolution sBest = sCurrent;
 
 	vector<swapPair> tabu;
-	size_t sizeTabu = 5;
+	size_t sizeTabu = 15;
 	swapPair movement;
 
 	double curQuality = sCurrent.vehicleSolQuality;
@@ -440,18 +449,22 @@ vehicleSolution GVRPSolver::tabuSearch(vehicleSolution greedySol) {
 		for(size_t i = 0; i < greedySol.route.size(); i++) {
 			for(size_t j = 0; j < greedySol.route.size(); j++) {
 				if(int(j) - int(i) >= 2 || int(i) - int(j) >= 2) {
-					cout << "j=" << j << " i=" << i << endl;
 					movement = makeMovementPair(sCurrent.route[i], sCurrent.route[j]);
-					printMovement(movement);
 					if(!isTabu(tabu, movement)) {
 						generateNewSol(sCurrent, i, j);
+
+						/*checkFeasibility(sCurrent.route);
+						DEBUG(sCurrent.vehicleSolQuality);
+						DEBUG(sCurrent.vehicleAcumTime);*/
 
 						tabu.push_back(movement);
 						if(tabu.size() > sizeTabu) {
 							tabu.erase(tabu.begin());
 						}
-
 						if(sCurrent.vehicleSolQuality > curQuality) {
+							cout << "Se mejoro la calidad?";
+							DEBUG(sCurrent.vehicleSolQuality);
+							DEBUG(curQuality);
 							sBest = sCurrent;
 						}
 					}
