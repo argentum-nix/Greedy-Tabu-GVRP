@@ -1,6 +1,5 @@
 #include <fstream>
 #include <sstream>
-#include <algorithm>
 #include "instance_util.h"
 using namespace std;
 

@@ -7,9 +7,11 @@
 //typedef std::map<int,int> hash;
 typedef std::pair<char, int> nodeKey;
 typedef std::pair<std::pair<int, double>, std::pair<double, double>> AFSDepotRouteInfo;
+typedef std::pair<nodeKey, nodeKey> swapPair;
 
 double distanceHarvesine(double lon1, double lat1, double lon2, double lat2);
 void printNodeKeyVector(std::vector<nodeKey> v);
+void printMovement(swapPair p);
 
 class vehicleSolution {
 public:
@@ -17,6 +19,7 @@ public:
 	double vehicleSolQuality;
 	int vehicleClients;
 	std::vector<nodeKey> route;
+
 	void setVehicleSolution(std::vector<nodeKey> r, double time, double quality, int clients);
 	vehicleSolution();
 	~vehicleSolution();
@@ -43,6 +46,11 @@ private:
 public:
 	vehicleSolution greedySearch();
 	vehicleSolution tabuSearch(vehicleSolution greedySol);
+	int isTabu(std::vector<swapPair> tabu, swapPair movement);
+	void recalculateTimeQuality(vehicleSolution s, int i, int j);
+	void generateNewSol(vehicleSolution s, int i, int j);
+	swapPair makeMovementPair(nodeKey node1, nodeKey node2);
+	Node findNodeByType(nodeKey n);
 	GVRPSolver(Instance* instance);
 	~GVRPSolver();
 };	
