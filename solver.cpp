@@ -1,22 +1,23 @@
 #include "solver.h"
 #include <cmath>
+#include <iomanip>
+#include <sys/stat.h>
 using namespace std;
 
 GVRPSolver::GVRPSolver(Instance* instance){
-	cout << "Creando el solver..." << endl;
 	curInstance = instance;
 	solDir = OUTPUT_DIRECTORY;
 	solQuality = 0;
 	numVehicle = 0;
 	numVisitedClients = 0;
-	executionTime = 0; // check this
+	executionTime = 0; 
 	// Initialize the vector
 	for(int i = 0; i < curInstance->numCustomers; i++) {
 		visitedCustomerNodes.push_back(0);
 	}
 	vehicleSolution sol = greedySearch();
 	vehicleSolution tabu;
-	int greedyQuality = 0;
+	double greedyQuality = 0;
 	while(sol.vehicleClients != 0) {
 		tabu = tabuSearch(sol);
 		vehicleRoutes.push_back(tabu);
@@ -28,11 +29,42 @@ GVRPSolver::GVRPSolver(Instance* instance){
 
 		sol = greedySearch();
 	}
-	/*cout << "En total envie: " << numVehicle << " autos\n";
-	cout << "Y visite: " << numVisitedClients << " clientes\n";
-	cout << "Calidad total de " << solQuality << endl;
-	cout << "Calidad greedy fue:" << greedyQuality << endl;*/
 } 
+
+
+void GVRPSolver::setExecTime(double seconds) {
+	executionTime = seconds;
+}
+
+string GVRPSolver::routeToString(vector<nodeKey> r) {
+	string route;
+	for(size_t i = 0; i < r.size(); i++) {
+		route += r[i].first;
+		route += to_string(r[i].second);
+		route += '-';
+	}
+	route.pop_back();
+	return route;
+}
+
+void GVRPSolver::writeSolution() {
+	mkdir(solDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	ofstream out(solDir + curInstance->name + ".out");
+	if(out.is_open()) {
+		out << solQuality << "   " << numVisitedClients << "   " << numVehicle << "   " << executionTime << "\n";
+		for(size_t i = 0; i < vehicleRoutes.size(); i++) {
+			isValidSolution(vehicleRoutes[i]);
+			out << left << setw(70) << routeToString(vehicleRoutes[i].route);
+			out << setw(10) << vehicleRoutes[i].vehicleSolQuality;
+			out << setw(10) << vehicleRoutes[i].vehicleAcumTime;
+			out << setw(10) << "0" << "\n";
+		}
+		out.close();
+	}	
+	else {
+		cout << "Error writing to file!\n";
+	}
+}
 
 vehicleSolution::vehicleSolution() {
 	vehicleAcumTime = vehicleClients = vehicleSolQuality = 0;

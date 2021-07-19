@@ -3,9 +3,11 @@
 
 #include <iostream>
 #include <map>
+#include <fstream>
 #include <vector>
 #include <string>
 #include <algorithm>
+
 
 #define TARGET_DIRECTORY "./instances/"
 #define DEBUG(x) cout << #x << " = " << x << endl

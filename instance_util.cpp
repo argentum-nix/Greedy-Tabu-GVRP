@@ -1,12 +1,9 @@
-#include <fstream>
 #include <sstream>
 #include "instance_util.h"
 using namespace std;
 
 
-Node::Node() {
-
-}
+Node::Node() {}
 
 void Node::setNodeData(int id, char t, double lon, double lat) {
 	nodeID = id;
@@ -15,20 +12,14 @@ void Node::setNodeData(int id, char t, double lon, double lat) {
 	latitude = lat;
 }
 
-Node::~Node() {
-	//cout << "[LOG] Node destroyed\n";
-}
-
+Node::~Node() {}
 
 Instance::Instance(std::string iName) {
 	dir = TARGET_DIRECTORY;
 	name = iName;
 }
 
-Instance::~Instance() {
-	//cout << "[LOG] Instance destroyed\n";
-}
-
+Instance::~Instance() {}
 
 int Instance::loadData() {
 	ifstream in(dir + name + ".dat");
@@ -39,7 +30,7 @@ int Instance::loadData() {
 	    int id;
 	    char ntype;
 	    double longitude, latitude;
-	    // Lee la primera linea que es distinta
+	    // Read the first line of the archive
 	    cin >> name
 	    	>> numCustomers
 	    	>> numStations
@@ -49,28 +40,13 @@ int Instance::loadData() {
 	    	>> serviceTime
 	    	>> refuelTime;
 	    	
-	    /*DEBUG(name);
-	    DEBUG(numStations);
-	    DEBUG(numStations);
-	    DEBUG(maxTime);
-	    DEBUG(maxDistance);
-	    DEBUG(speed);
-	    DEBUG(serviceTime);
-	    DEBUG(refuelTime);*/
-
-	 	// Lee el arhivo restante
+	 	// Read the contents of the archive
 	    while(cin >> id) {
 	    	cin >> ntype 
 	    		>> longitude
 	    		>> latitude;
 	    	
-	    	/*cout << "================\n";
-	    	DEBUG(id);
-	    	DEBUG(ntype);
-	    	DEBUG(longitude);
-	    	DEBUG(latitude);
-	    	cout << "================\n";*/
-
+	    	// Set up the nodes
 	    	Node node;
 	    	node.setNodeData(id, ntype, longitude, latitude);
 
