@@ -35,22 +35,17 @@ private:
 	double executionTime; 	// total execution time * quiza debe ser en  main? isntance
 
 	std::vector<int> visitedCustomerNodes;
-	//std::map<hash, int> distances;
-	// (key, distance)
-	// key is such as <idNode1,idNode2>
-	// if <idNode> is 2i, its a customer with id=i
-	// otherwise (2i+1) its a fuel with id=i
 	std::vector<vehicleSolution> vehicleRoutes;
-	AFSDepotRouteInfo findRouteToDepot(double acumDist, double acumTime, double lon1, double lat1);
-	void checkFeasibility(std::vector<nodeKey> v);
 public:
 	vehicleSolution greedySearch();
 	vehicleSolution tabuSearch(vehicleSolution greedySol);
+	AFSDepotRouteInfo findRouteToDepot(double acumDist, double acumTime, double lon1, double lat1);
 	int isTabu(std::vector<swapPair> tabu, swapPair movement);
-	void recalculateTimeQuality(vehicleSolution s, int i, int j);
-	void generateNewSol(vehicleSolution s, int i, int j);
+	void recalculateTimeQuality(vehicleSolution* s, int i, int j);
+	void generateNewSol(vehicleSolution* s, int i, int j);
 	swapPair makeMovementPair(nodeKey node1, nodeKey node2);
 	Node findNodeByType(nodeKey n);
+	bool isValidSolution(vehicleSolution s);
 	GVRPSolver(Instance* instance);
 	~GVRPSolver();
 };	

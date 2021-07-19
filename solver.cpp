@@ -15,32 +15,23 @@ GVRPSolver::GVRPSolver(Instance* instance){
 		visitedCustomerNodes.push_back(0);
 	}
 	vehicleSolution sol = greedySearch();
-	cout << "Ruta inicial es: ";
-	printNodeKeyVector(sol.route);
-	cout << "Calidad inical  de " << sol.vehicleSolQuality << endl;
 	vehicleSolution tabu;
-
-	tabu = tabuSearch(sol);
-	checkFeasibility(tabu.route);
-	cout << "Obtuve tabu con ruta: ";
-	printNodeKeyVector(tabu.route);
-	cout << "Calidad total de:" << tabu.vehicleSolQuality;
-	/*
+	int greedyQuality = 0;
 	while(sol.vehicleClients != 0) {
-		//cout << "cl=" << sol.vehicleClients << endl;
-		numVisitedClients += sol.vehicleClients;
+		tabu = tabuSearch(sol);
+		vehicleRoutes.push_back(tabu);
+
+		numVisitedClients += tabu.vehicleClients;
 		numVehicle++;
-		solQuality += sol.vehicleSolQuality;
-		//cout << "Calidad obtenida= " << sol.vehicleSolQuality << " tiempo = " << sol.vehicleAcumTime << endl;
-		//checkFeasibility(sol.route);
-		//printNodeKeyVector(sol.route);
-		//cout << "\n";
+		solQuality += tabu.vehicleSolQuality;
+		greedyQuality += sol.vehicleSolQuality;
+
 		sol = greedySearch();
 	}
-	//cout << "En total envie: " << numVehicle << " autos\n";
-	//cout << "Y visite: " << numVisitedClients << " clientes\n";
-	//cout << "Calidad total de " << solQuality << endl;
-	//checkFeasibility(sol.route);*/
+	/*cout << "En total envie: " << numVehicle << " autos\n";
+	cout << "Y visite: " << numVisitedClients << " clientes\n";
+	cout << "Calidad total de " << solQuality << endl;
+	cout << "Calidad greedy fue:" << greedyQuality << endl;*/
 } 
 
 vehicleSolution::vehicleSolution() {
@@ -240,59 +231,6 @@ vehicleSolution GVRPSolver::greedySearch() {
 	return solution;
 }
 
-
-
-void GVRPSolver::checkFeasibility(std::vector<nodeKey> v) {
-	Node auxNode, curNode;
-	double totalQuality = 0;
-	double totalTime = 0;
-	double acumDist = 0;
-	double dist = 0;
-	cout << "CHECK:==========================================\n";
-	curNode = curInstance->depot;
-	for(size_t i = 1; i < v.size(); i++) {
-		if(v[i].first == 'c' ) {
-			auxNode = curInstance->customerNodes[v[i].second-1];
-			dist = distanceHarvesine(curNode.longitude, curNode.latitude, auxNode.longitude, auxNode.latitude);
-			acumDist += dist;
-			if(dist > curInstance->maxDistance || acumDist > curInstance->maxDistance) {
-				cout << "No se cumplio la restriccion de viaje maximo en el nodo: " << auxNode.nodeType << auxNode.nodeID << endl;
-			}
-			totalQuality += dist;
-			totalTime += dist/curInstance->speed + curInstance->serviceTime;
-		}
-		else if(v[i].first == 'f') {
-			auxNode = curInstance->fuelNodes[v[i].second];
-			dist = distanceHarvesine(curNode.longitude, curNode.latitude, auxNode.longitude, auxNode.latitude);
-			acumDist = 0;
-			if(dist > curInstance->maxDistance) {
-				cout << "No se cumplio la restriccion de viaje maximo en el nodo: " << auxNode.nodeType << auxNode.nodeID << endl;
-			}
-			totalQuality += dist;
-			totalTime += dist/curInstance->speed + curInstance->refuelTime;
-		}
-		else {
-			auxNode = curInstance->depot;
-			dist = distanceHarvesine(curNode.longitude, curNode.latitude, auxNode.longitude, auxNode.latitude);
-			if(dist > curInstance->maxDistance || acumDist > curInstance->maxDistance) {
-				cout << "No se cumplio la restriccion de viaje maximo en el nodo: " << auxNode.nodeType << auxNode.nodeID << endl;
-			}
-			totalQuality += dist;
-			totalTime += dist/curInstance->speed;
-
-		}
-		curNode = auxNode;
-		if(totalTime > curInstance->maxTime) {
-			cout << "No se cumplio la restriccion de tiempo en el nodo: " << auxNode.nodeType << auxNode.nodeID << endl;
-		}
-
-		//cout << auxNode.nodeType << auxNode.nodeID << " " << totalQuality << " " << totalTime << "\n";
-
-	}
-	DEBUG(totalTime);
-	DEBUG(totalQuality);
-}
-
 void printNodeKeyVector(std::vector<nodeKey> v) {
 	for(auto x: v) {
 		cout << x.first << x.second << "-";
@@ -347,49 +285,48 @@ Node GVRPSolver::findNodeByType(nodeKey n) {
 	return curInstance->depot;
 }
 
-void GVRPSolver::recalculateTimeQuality(vehicleSolution s, int i, int j) {
+void GVRPSolver::recalculateTimeQuality(vehicleSolution* s, int i, int j) {
 	double e1 = 0, e2= 0, e3 = 0, e4 = 0;
 	double t1 = 0, t2 = 0, t3 = 0, t4 = 0;
-	double newQuality = s.vehicleSolQuality;
-	double newTime = s.vehicleAcumTime;
-	int n, m;
+	double newQuality = s->vehicleSolQuality;
+	double newTime = s->vehicleAcumTime;
+	int n = j;
+	int m = i;
+
 	Node aux1, aux2, aux3, aux4;
 	if(i < j) {
 		n = i;
 		m = j;
 	}
-	else {
-		n = j;
-		m = i;
-	}
 	// if we fully reversed the array, no need to recalculate the costs.
-	if(n == 0 && size_t(m) == s.route.size() - 1) return;
+	if(n == 0 && size_t(m) == s->route.size() - 1) return;
 
-	if(n != 0 && size_t(m) == s.route.size() - 1) {
-		aux1 = findNodeByType(s.route[n - 1]);
-		aux2 = findNodeByType(s.route[n]);
-		aux3 = findNodeByType(s.route[m]);
+
+	if(n != 0 && size_t(m) == s->route.size() - 1) {
+		aux1 = findNodeByType(s->route[n - 1]);
+		aux2 = findNodeByType(s->route[n]);
+		aux3 = findNodeByType(s->route[m]);
 
 		e1 = distanceHarvesine(aux1.longitude, aux1.latitude, aux2.longitude, aux2.latitude);
 		e4 = distanceHarvesine(aux1.longitude, aux1.latitude, aux3.longitude, aux3.latitude);
 		t1 = e1/curInstance->speed;
 		t4 = e4/curInstance->speed;
 	}
-	else if(n == 0 && size_t(m) != s.route.size() - 1){
-		aux2 = findNodeByType(s.route[n]);
-		aux3 = findNodeByType(s.route[m]);
-		aux4 = findNodeByType(s.route[m + 1]);
+	else if(n == 0 && size_t(m) != s->route.size() - 1){
+		aux2 = findNodeByType(s->route[n]);
+		aux3 = findNodeByType(s->route[m]);
+		aux4 = findNodeByType(s->route[m + 1]);
 
 		e2 = distanceHarvesine(aux3.longitude, aux3.latitude, aux4.longitude, aux4.latitude);
 		e3 = distanceHarvesine(aux2.longitude, aux2.latitude, aux4.longitude, aux4.latitude);
 		t2 = e2/curInstance->speed;
 		t3 = e3/curInstance->speed;
 	}
-	else if(n != 0 && size_t(m) != s.route.size() - 1) {
-		aux1 = findNodeByType(s.route[n - 1]);
-		aux2 = findNodeByType(s.route[n]);
-		aux3 = findNodeByType(s.route[m]);
-		aux4 = findNodeByType(s.route[m + 1]);
+	else if(n != 0 && size_t(m) != s->route.size() - 1) {
+		aux1 = findNodeByType(s->route[n - 1]);
+		aux2 = findNodeByType(s->route[n]);
+		aux3 = findNodeByType(s->route[m]);
+		aux4 = findNodeByType(s->route[m + 1]);
 		e1 = distanceHarvesine(aux1.longitude, aux1.latitude, aux2.longitude, aux2.latitude);
 		e2 = distanceHarvesine(aux3.longitude, aux3.latitude, aux4.longitude, aux4.latitude);
 		e3 = distanceHarvesine(aux2.longitude, aux2.latitude, aux4.longitude, aux4.latitude);
@@ -405,22 +342,18 @@ void GVRPSolver::recalculateTimeQuality(vehicleSolution s, int i, int j) {
 	newTime -= t1 + t2;
 	newTime += t3 + t4;
 
-	s.vehicleSolQuality = newQuality;
-	s.vehicleAcumTime = newTime;
+	s->vehicleSolQuality = newQuality;
+	s->vehicleAcumTime = newTime;
 }
 
-void GVRPSolver::generateNewSol(vehicleSolution s, int i, int j) {
-	//DEBUG(i);
-	//DEBUG(j);
-	//printNodeKeyVector(s.route);
+void GVRPSolver::generateNewSol(vehicleSolution* s, int i, int j) {
+	recalculateTimeQuality(s, i, j);
 	if(i < j) {
-		reverse(s.route.begin() + i, s.route.begin() + j + 1); //2opt
+		reverse(s->route.begin() + i, s->route.begin() + j + 1); //2opt
 	}
 	else{
-		reverse(s.route.begin() + j, s.route.begin() + i + 1); //2opt;
+		reverse(s->route.begin() + j, s->route.begin() + i + 1); //2opt;
 	}
-	//printNodeKeyVector(s.route);
-	recalculateTimeQuality(s, i, j);
 }
 
 swapPair GVRPSolver::makeMovementPair(nodeKey node1, nodeKey node2) {
@@ -434,38 +367,86 @@ void printMovement(swapPair p){
 	cout << p.second.first << ", " << p.second.second << "}}\n";
 }
 
+bool GVRPSolver::isValidSolution(vehicleSolution s) {
+	// time limit surpassed
+	if(s.vehicleAcumTime > curInstance->maxTime) return false;
+
+	nodeKey firstNode = s.route[0];
+	nodeKey lastNode = s.route[s.route.size() - 1];
+	// do not start at the depot
+	if(firstNode.first != 'd') return false;
+
+	// do not return to the depot
+	if(lastNode.first != 'd') return false;
+
+	// check if distance was not violated
+	Node auxNode, curNode;
+	double totalQuality = 0, totalTime = 0, acumDist = 0, dist = 0;
+	curNode = curInstance->depot;
+	for(size_t i = 1; i < s.route.size(); i++) {
+		if(s.route[i].first == 'c' ) {
+			auxNode = curInstance->customerNodes[s.route[i].second-1];
+			dist = distanceHarvesine(curNode.longitude, curNode.latitude, auxNode.longitude, auxNode.latitude);
+			acumDist += dist;
+			if(dist > curInstance->maxDistance || acumDist > curInstance->maxDistance) {
+				return false;
+			}
+			totalQuality += dist;
+			totalTime += dist/curInstance->speed + curInstance->serviceTime;
+		}
+		else if(s.route[i].first == 'f') {
+			auxNode = curInstance->fuelNodes[s.route[i].second];
+			dist = distanceHarvesine(curNode.longitude, curNode.latitude, auxNode.longitude, auxNode.latitude);
+			acumDist = 0;
+			if(dist > curInstance->maxDistance) {
+				return false;
+			}
+			totalQuality += dist;
+			totalTime += dist/curInstance->speed + curInstance->refuelTime;
+		}
+		else {
+			auxNode = curInstance->depot;
+			dist = distanceHarvesine(curNode.longitude, curNode.latitude, auxNode.longitude, auxNode.latitude);
+			if(dist > curInstance->maxDistance || acumDist > curInstance->maxDistance) {
+				return false;
+			}
+			totalQuality += dist;
+			totalTime += dist/curInstance->speed;
+
+		}
+		curNode = auxNode;
+	}
+	return true;
+}
+
 vehicleSolution GVRPSolver::tabuSearch(vehicleSolution greedySol) {
 	vehicleSolution sCurrent = greedySol;
 	vehicleSolution sBest = sCurrent;
 
 	vector<swapPair> tabu;
-	size_t sizeTabu = 15;
+	size_t sizeTabu = 20;
 	swapPair movement;
 
 	double curQuality = sCurrent.vehicleSolQuality;
 
-	int t = 5;
+	int t = 30;
 	while(t--) {
 		for(size_t i = 0; i < greedySol.route.size(); i++) {
 			for(size_t j = 0; j < greedySol.route.size(); j++) {
 				if(int(j) - int(i) >= 2 || int(i) - int(j) >= 2) {
 					movement = makeMovementPair(sCurrent.route[i], sCurrent.route[j]);
 					if(!isTabu(tabu, movement)) {
-						generateNewSol(sCurrent, i, j);
-
-						/*checkFeasibility(sCurrent.route);
-						DEBUG(sCurrent.vehicleSolQuality);
-						DEBUG(sCurrent.vehicleAcumTime);*/
+						generateNewSol(&sCurrent, i, j);
 
 						tabu.push_back(movement);
 						if(tabu.size() > sizeTabu) {
 							tabu.erase(tabu.begin());
 						}
-						if(sCurrent.vehicleSolQuality > curQuality) {
-							cout << "Se mejoro la calidad?";
-							DEBUG(sCurrent.vehicleSolQuality);
-							DEBUG(curQuality);
+
+						if(isValidSolution(sCurrent) && sCurrent.vehicleSolQuality < curQuality) {
 							sBest = sCurrent;
+							curQuality = sCurrent.vehicleSolQuality;
+
 						}
 					}
 				}
