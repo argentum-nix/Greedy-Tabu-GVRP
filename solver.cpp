@@ -47,6 +47,47 @@ string GVRPSolver::routeToString(vector<nodeKey> r) {
 	return route;
 }
 
+
+double GVRPSolver::calculateExceededDistance(vehicleSolution s) {
+	if(s.exceededDist != -1) return 0;
+	Node auxNode, curNode;
+	double exceeded = 0, acumDist = 0, dist = 0;
+	curNode = curInstance->depot;
+	for(size_t i = 1; i < s.route.size(); i++) {
+		if(s.route[i].first == 'c' ) {
+			auxNode = curInstance->customerNodes[s.route[i].second-1];
+			dist = distanceHarvesine(curNode.longitude, curNode.latitude, auxNode.longitude, auxNode.latitude);
+			acumDist += dist;
+			if(dist > curInstance->maxDistance) {
+				exceeded += dist - curInstance->maxDistance;
+			}
+			else if(acumDist > curInstance->maxDistance) {
+				exceeded += dist - curInstance->maxDistance;
+			}
+		}
+		else if(s.route[i].first == 'f') {
+			auxNode = curInstance->fuelNodes[s.route[i].second];
+			dist = distanceHarvesine(curNode.longitude, curNode.latitude, auxNode.longitude, auxNode.latitude);
+			acumDist = 0;
+			if(dist > curInstance->maxDistance) {
+				exceeded += dist - curInstance->maxDistance;
+			}
+		}
+		else {
+			auxNode = curInstance->depot;
+			dist = distanceHarvesine(curNode.longitude, curNode.latitude, auxNode.longitude, auxNode.latitude);
+			if(dist > curInstance->maxDistance) {
+				exceeded += dist - curInstance->maxDistance;
+			}
+			else if(acumDist > curInstance->maxDistance) {
+				exceeded += dist - curInstance->maxDistance;
+			}
+		}
+		curNode = auxNode;
+	}
+	return exceeded;
+}
+
 void GVRPSolver::writeSolution() {
 	mkdir(solDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	ofstream out(solDir + curInstance->name + ".out");
@@ -57,7 +98,7 @@ void GVRPSolver::writeSolution() {
 			out << left << setw(70) << routeToString(vehicleRoutes[i].route);
 			out << setw(10) << vehicleRoutes[i].vehicleSolQuality;
 			out << setw(10) << vehicleRoutes[i].vehicleAcumTime;
-			out << setw(10) << "0" << "\n";
+			out << setw(10) << calculateExceededDistance(vehicleRoutes[i]) << "\n";
 		}
 		out.close();
 	}	
@@ -73,6 +114,7 @@ vehicleSolution::vehicleSolution() {
 void vehicleSolution::setVehicleSolution(std::vector<nodeKey> r, double time, double quality, int clients) {
 	vehicleSolQuality = quality;
 	route = r;
+	exceededDist = 0;
 	vehicleAcumTime = time;
 	vehicleClients = clients;
 }
@@ -421,7 +463,8 @@ bool GVRPSolver::isValidSolution(vehicleSolution s) {
 			dist = distanceHarvesine(curNode.longitude, curNode.latitude, auxNode.longitude, auxNode.latitude);
 			acumDist += dist;
 			if(dist > curInstance->maxDistance || acumDist > curInstance->maxDistance) {
-				return false;
+				s.exceededDist = -1; // flag -1, the algorithm won't calculate excedeed distance to optimize
+				return false;		 // and return directly without looping over the whole route
 			}
 			totalQuality += dist;
 			totalTime += dist/curInstance->speed + curInstance->serviceTime;
@@ -431,6 +474,7 @@ bool GVRPSolver::isValidSolution(vehicleSolution s) {
 			dist = distanceHarvesine(curNode.longitude, curNode.latitude, auxNode.longitude, auxNode.latitude);
 			acumDist = 0;
 			if(dist > curInstance->maxDistance) {
+				s.exceededDist = -1;
 				return false;
 			}
 			totalQuality += dist;
@@ -440,6 +484,7 @@ bool GVRPSolver::isValidSolution(vehicleSolution s) {
 			auxNode = curInstance->depot;
 			dist = distanceHarvesine(curNode.longitude, curNode.latitude, auxNode.longitude, auxNode.latitude);
 			if(dist > curInstance->maxDistance || acumDist > curInstance->maxDistance) {
+				s.exceededDist = -1;
 				return false;
 			}
 			totalQuality += dist;

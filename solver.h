@@ -18,7 +18,7 @@ public:
 	double vehicleSolQuality;
 	int vehicleClients;
 	std::vector<nodeKey> route;
-	
+	double exceededDist;
 	void setVehicleSolution(std::vector<nodeKey> r, double time, double quality, int clients);
 	vehicleSolution();
 	~vehicleSolution();
@@ -42,6 +42,7 @@ public:
 	AFSDepotRouteInfo findRouteToDepot(double acumDist, double acumTime, double lon1, double lat1);
 	std::string routeToString(std::vector<nodeKey> r);
 	int isTabu(std::vector<swapPair> tabu, swapPair movement);
+	double calculateExceededDistance(vehicleSolution s);
 	bool isValidSolution(vehicleSolution s);
 	void setExecTime(double seconds);
 	void writeSolution();
