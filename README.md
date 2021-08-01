@@ -3,7 +3,7 @@
 ## Sobre makefile
 Para compilar todos los archivos se debe ejecutar el comando
 ```bash
-	make 
+make 
 ```
 
 Para correr el ejecutable se debe utilizar el siguiente comando:
@@ -13,12 +13,11 @@ Para correr el ejecutable se debe utilizar el siguiente comando:
 donde {0} corresponde al número de la instancia. Por ejemplo, para la instancia AB101 se tiene:
 ```bash
 ./GVRPGreedyTabu AB101
-
 ```
 
 Para eliminar los archivos compilados se debe ejecutar el comando:
 ```bash
-	make clean
+make clean
 ```
 
 ## Consideraciones
