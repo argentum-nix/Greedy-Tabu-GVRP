@@ -8,16 +8,15 @@
 #include <string>
 #include <algorithm>
 
-
 #define TARGET_DIRECTORY "./instances/"
 #define DEBUG(x) cout << #x << " = " << x << endl
 
 class Node {
 public:
 	int nodeID;				// id for solution route
-	double longitude;  
-	double latitude;
-	char nodeType;   // d=depot, f=refueling stat, c=customer   	
+	double longitude;  		// node latitude
+	double latitude;		// node longitude
+	char nodeType;   	    // d=depot, f=AFS, c=customer   	
 	Node();
 	void setNodeData(int id, char t, double lon, double lat);
 	~Node();
@@ -29,10 +28,10 @@ public:
 	std::string dir;		// instance directory
 	int maxTime;	   		// time limit
 	int maxDistance;   		// distance limit
-	int numCustomers;  
-	int numStations; 
-	int refuelTime;     
-	int serviceTime;               
+	int numCustomers;  		// number of customs
+	int numStations; 		// numbor of AFS
+	int refuelTime;     	// time it takes to refuel
+	int serviceTime;        // time it takes to serve a client
 	double speed;      		// travelling speed
 
 	std::vector<Node> customerNodes;
@@ -41,7 +40,7 @@ public:
 
 	int loadData();
 	Instance(std::string iName);
-	~Instance();		   		// destructor
+	~Instance();
 };
 
 

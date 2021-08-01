@@ -14,11 +14,11 @@ void printMovement(swapPair p);
 
 class vehicleSolution {
 public:
-	double vehicleAcumTime;
-	double vehicleSolQuality;
-	int vehicleClients;
-	std::vector<nodeKey> route;
-	double exceededDist;
+	double vehicleAcumTime;						// total travel time acumulated by the vehicle
+	double vehicleSolQuality;					// total distance traveled by the vehicle
+	int vehicleClients;							// number of clients visited by the vehicle
+	std::vector<nodeKey> route;					// the route taken by the vehicle
+	double exceededDist;						// exceeded distance (if any)
 	void setVehicleSolution(std::vector<nodeKey> r, double time, double quality, int clients);
 	vehicleSolution();
 	~vehicleSolution();
@@ -26,13 +26,13 @@ public:
 
 class GVRPSolver {
 private:
-	Instance* curInstance;	// current instance
-	std::string solDir;		// solution directory
-	double solQuality;		// solution quality == total distance for all vehicles
-	int numVehicle; 		// final vehicle quantity
-	int numVisitedClients; 	// total of clientes serviced for all vehicles
-	double executionTime; 	// total execution time * quiza debe ser en  main? isntance
-	std::vector<int> visitedCustomerNodes;	// array with visited clients (1=visited, 0=othervise)
+	Instance* curInstance;						// current instance
+	std::string solDir;							// solution directory
+	double solQuality;							// total distance for all vehicles
+	int numVehicle; 							// final vehicle quantity
+	int numVisitedClients; 						// total of clientes serviced for all vehicles
+	double executionTime; 						// total execution time
+	std::vector<int> visitedCustomerNodes;		// array with visited clients (1=visited, 0=othervise)
 	std::vector<vehicleSolution> vehicleRoutes;	// vector with solutions for each vehicle
 public:
 	vehicleSolution greedySearch();
