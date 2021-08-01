@@ -42,7 +42,7 @@ No se requieren librerias externas.
 ### Sobre algoritmo
 Se aplica Greedy Search para generar la solución inicial, que será mejorada a través de Tabu Search. Se aplican restricciones duras a la búsqueda Greedy, con tal de generar siempre el tour factible (ciclo que cumple con distancias de viaje y tiempo total de servicio de vehículo). TS como movimiento utiliza la heurística 2opt. No existe limite de vehículos en la flota.
 
-## Experimientos
+## Experimentos
 ### runall.py
 Corresponde a un script que permite correr todas las instancias (AB1 y AB2) con la configuración predeterminada.
 ### experiments.py
