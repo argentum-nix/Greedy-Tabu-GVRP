@@ -1,4 +1,8 @@
 # GVRP using Greedy Tabu Search
+Solver para Green Vehicle Routing problem que implementa dos técnicas de búsqueda incompleta - Greedy Search y TS.
+
+### Sobre algoritmo
+Se aplica Greedy Search para generar la solución inicial, que será mejorada (en caso e ser posible) a través de Tabu Search. Se aplican restricciones duras a la búsqueda Greedy, con tal de generar siempre el tour factible (ciclo que cumple con distancias de viaje y tiempo total de servicio de vehículo). TS como movimiento utiliza la heurística 2-opt. No existe limite de vehículos en la flota.
 
 ## Sobre makefile
 Para compilar todos los archivos se debe ejecutar el comando
@@ -38,9 +42,6 @@ Se puede cambiar el directorio de soluciones cambiando el valor de la variable
 en el archivo `solver.h`.
 ### Librerias
 No se requieren librerias externas.
-
-### Sobre algoritmo
-Se aplica Greedy Search para generar la solución inicial, que será mejorada a través de Tabu Search. Se aplican restricciones duras a la búsqueda Greedy, con tal de generar siempre el tour factible (ciclo que cumple con distancias de viaje y tiempo total de servicio de vehículo). TS como movimiento utiliza la heurística 2opt. No existe limite de vehículos en la flota.
 
 ### runall.py
 Corresponde a un script que permite correr todas las instancias (AB1 y AB2) con la configuración predeterminada.
