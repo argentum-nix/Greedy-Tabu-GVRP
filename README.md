@@ -42,9 +42,12 @@ No se requieren librerias externas.
 ### Sobre algoritmo
 Se aplica Greedy Search para generar la solución inicial, que será mejorada a través de Tabu Search. Se aplican restricciones duras a la búsqueda Greedy, con tal de generar siempre el tour factible (ciclo que cumple con distancias de viaje y tiempo total de servicio de vehículo). TS como movimiento utiliza la heurística 2opt. No existe limite de vehículos en la flota.
 
-## Experimentos
 ### runall.py
 Corresponde a un script que permite correr todas las instancias (AB1 y AB2) con la configuración predeterminada.
+
+## Experimentos
+La carpeta GVRPtester contiene el código modificado para llevar a cabo el proceso de testeo. Para ejecutar el código se debe utilizar el mismo makefile (que debe ser ubicado dentro de la carpeta de tester). Además, se debe procurar agregar la carpeta de instancias al directorio de tester o cambiar el valor de la ruta en el código.
+
 ### experiments.py
 Corresponde a un script que realiza 480 pruebas para las distintas configuraciones para duplas (largo de lista tabu, cantidad de iteraciones), donde
 el largo de la lista tabu puede tomar los valores de conjunto `L={3, 8, 13, 21}`, mientras que el numero de iteraciones pertenece al conjunto `I={8, 34, 55}`. Los experimientos corresponden a las pruebas para las duplas obtenidas al hacer `L x I` para las 40 instancias.
